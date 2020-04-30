@@ -24,7 +24,7 @@ pip install -r requirements
 
 ## Downloading problem instances
 
-```python3
+```bash
 python -m src.benchmark download --help
 ```
 
@@ -33,7 +33,7 @@ Downloads a set of instances (i.e. problems) from the S3 bucket. The relevant ac
 
 ## Extracting metrics from solution instances
 
-```python3
+```bash
 python -m src.benchmark extract --help
 ```
 
@@ -42,7 +42,7 @@ From a folder with a set of solution instances, extract meaningful metrics like 
 
 ## Update oracle
 
-```python3
+```bash
 python -m src.benchmark update-oracle --help
 ```
 
@@ -50,7 +50,7 @@ This step can be done as part of "extract" (see 'extract' options). It updates t
 
 ## Compare results
 
-```python3
+```bash
 python -m src.benchmark compare --help
 ```
 
