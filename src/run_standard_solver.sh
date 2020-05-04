@@ -16,7 +16,7 @@ tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
 
 # Run all instances
 for i in $2/*.json; do
-    python -m scripts.e2e._run --outputDir $tmp_dir $i;
+    python -m src._run --outputDir $tmp_dir $i;
     mv $tmp_dir/06_solution_int_valid.json $3/$(basename $i);
 done
 
