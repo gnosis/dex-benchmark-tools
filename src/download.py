@@ -31,7 +31,7 @@ def get_instance_list(
         Bucket=bucket, Prefix=prefix, MaxKeys=page_size
     )
     l |= {r['Key'] for r in page['Contents']}
-    return l
+
     while page['IsTruncated']:
         page = client.list_objects_v2(
             Bucket=bucket,
@@ -122,7 +122,6 @@ def select_feasible_batches(
     # select all feasible instances
     feasible = set()
     for name, path in instances(result_paths):
-        print(name, path)
         try:
             instance = load_json(path)
         except json.JSONDecodeError:
@@ -146,7 +145,7 @@ def filter_unique(instances_path: Path):
             continue
         if filecmp.cmp(path1, path2):
             to_remove.add(path2)
-    print("removing:", to_remove)
+
     for path in to_remove:
         os.remove(path)
 
@@ -191,8 +190,7 @@ def main(args):
         (len(feasible_batches) * args.fraction_infeasible)
         / (1 - args.fraction_infeasible)
     )
-    print(len(feasible_batches))
-    print("nr_infeasible", nr_infeasible)
+
     infeasible_batches = select_batches(
         infeasible_batches,
         nr_infeasible,
