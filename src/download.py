@@ -215,29 +215,29 @@ def setup_arg_parser(subparsers):
     parser = subparsers.add_parser('download', help="Downloads instances from S3 bucket.")
 
     parser.add_argument(
-        'instances-path',
+        'instances_path',
         type=Path,
         help='Directory where to copy instances to.'
     )
     parser.add_argument(
-        '--from-date',
+        '--from_date',
         type=str,
         help='Get instances newer than the given date (inclusive).'
     )
     parser.add_argument(
-        '--max-nr-instances',
+        '--max_nr_instances',
         type=int,
         default=100,
         help='Maximum number of instances to download.'
     )
     parser.add_argument(
-        '--fraction-infeasible',
+        '--fraction_infeasible',
         type=float,
         default=1 / 3,
         help='Instances should have at most given fraction of infeasible instances.'
     )
     parser.add_argument(
-        '--selection-criteria',
+        '--selection_criteria',
         type=str,
         choices=['most_recent', 'random'],
         default='random',

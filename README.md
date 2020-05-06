@@ -43,7 +43,7 @@ From a folder with a set of solution instances, extract meaningful metrics like 
 ## Update oracle
 
 ```bash
-python -m src.benchmark update-oracle --help
+python -m src.benchmark update_oracle --help
 ```
 
 This step can be done as part of "extract" (see 'extract' options). It updates the oracle DB with the results from a given "results" file.

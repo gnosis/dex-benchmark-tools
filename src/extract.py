@@ -93,22 +93,22 @@ def setup_arg_parser(subparsers):
     )
 
     parser.add_argument(
-        'problems-path',
+        'problems_path',
         type=dir_path,
         help='Directory containing the problem files.'
     )
     parser.add_argument(
-        'solutions-path',
+        'solutions_path',
         type=dir_path,
         help='Directory containing the solution files.'
     )
     parser.add_argument(
-        'results-path',
+        'results_path',
         type=Path,
         help='File to dump results to.'
     )
     parser.add_argument(
-        '--oracle-path',
+        '--oracle_path',
         type=Path,
         help='If given then also update the given oracle file with the extracted results.'
     )

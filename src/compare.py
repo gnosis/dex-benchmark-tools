@@ -262,22 +262,22 @@ def setup_arg_parser(subparsers):
     parser = subparsers.add_parser('compare', help="Compares two results files.")
 
     parser.add_argument(
-        'solver-results-path-1',
+        'solver_results_path_1',
         type=Path,
         help='File containing the first results file to compare.'
     )
     parser.add_argument(
-        'solver-results-path-2',
+        'solver_results_path_2',
         type=Path,
         help='File containing the second results file to compare.'
     )
     parser.add_argument(
-        'oracle-path',
+        'oracle_path',
         type=Path,
         help='Oracle file containing known results for the benchmarks being compared.'
     )
     parser.add_argument(
-        '--group-by',
+        '--group_by',
         type=str,
         choices=[
             'problem_size_quantiles',

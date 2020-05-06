@@ -18,12 +18,12 @@ def setup_arg_parser(subparsers):
     parser = subparsers.add_parser('update-oracle', help="Updates oracle from result files.")
 
     parser.add_argument(
-        'results-path',
+        'results_path',
         type=Path,
         help='File containing the results file to update the oracle with.'
     )
     parser.add_argument(
-        'oracle-path',
+        'oracle_path',
         type=Path,
         help='Oracle file to update (will be created if it does not exist)'
     )
