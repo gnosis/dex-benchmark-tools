@@ -17,7 +17,7 @@ This is a set of tools for benchmarking the batch auction solvers.
 ```bash
 virtualenv --python=/usr/bin/python3 venv
 . venv/bin/activate
-pip install -r requirements
+pip install -r requirements.txt
 ```
 
 # Usage
