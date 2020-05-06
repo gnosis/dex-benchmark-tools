@@ -4,3 +4,4 @@ pandas==1.0.3 # for data analysis
 matplotlib==3.2.1 # for making charts
 flake8==3.7.9 # source code formatter
 tqdm==4.45.0 # progress bars
+boto3==1.13.3 # AWS access
