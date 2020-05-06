@@ -251,7 +251,7 @@ def main(args):
     }
     html_out = template.render(template_vars)
 
-    with tempfile.NamedTemporaryFile('w', delete=True, suffix='.html') as f:
+    with tempfile.NamedTemporaryFile('w', delete=False, suffix='.html') as f:
         url = 'file://' + f.name
         f.write(html_out)
         f.flush()
