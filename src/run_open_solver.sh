@@ -4,6 +4,7 @@
 # $1 - path to standard solver root dir
 # $2 - path to problems directory
 # $3 - path to solutions directory
+# NOTE: This is supposed to be called from within standard solver virtual env
 
 # Save current dir
 cur_dir=$(pwd)

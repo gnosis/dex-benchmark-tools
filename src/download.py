@@ -16,8 +16,6 @@ from tqdm import tqdm
 from .util import Oracle, Results, instances, load_json
 
 bucket = 'gnosis-dev-dfusion'
-instances_prefix = 'data/mainnet/standard-solver/instances/'
-results_prefix = 'data/mainnet/standard-solver/results/'
 page_size = 1000
 
 
@@ -30,7 +28,7 @@ def get_instance_list(
     page = client.list_objects_v2(
         Bucket=bucket, Prefix=prefix, MaxKeys=page_size
     )
-    l |= {r['Key'] for r in page['Contents']}
+    l |= {r['Key'] for r in page['Contents'] if r['Key'][-4:] == 'json'}
 
     while page['IsTruncated']:
         page = client.list_objects_v2(
@@ -39,7 +37,7 @@ def get_instance_list(
             MaxKeys=page_size,
             ContinuationToken=page['NextContinuationToken']
         )
-        l |= {r['Key'] for r in page['Contents']}
+        l |= {r['Key'] for r in page['Contents'] if r['Key'][-4:] == 'json'}
     return l
 
 
@@ -115,7 +113,7 @@ def select_batches(
 
 def select_feasible_batches(
     max_nr_instances: int,
-    fraction_infeasible: float,
+    max_fraction_infeasible: float,
     selection_criteria: str,
     result_paths: Path
 ):
@@ -132,7 +130,7 @@ def select_feasible_batches(
     feasible = {get_instance_batch(instance) for instance in feasible}
 
     # select subset of feasible instances
-    nr_feasible = min(len(feasible), max_nr_instances * (1 - fraction_infeasible))
+    nr_feasible = min(len(feasible), int(max_nr_instances * (1 - max_fraction_infeasible)))
 
     return select_batches(feasible, nr_feasible, selection_criteria)
 
@@ -150,13 +148,43 @@ def filter_unique(instances_path: Path):
         os.remove(path)
 
 
+def get_batch_ids_from_file(filename):
+    with open(filename, 'r') as f:
+        return f.read().splitlines()
+
+
+def filter_paths(paths, args):
+    if args.from_date is not None:
+        paths = filter_instances_by_date(paths, args.from_date)
+    if args.with_batch_ids_from_file is not None:
+        paths = filter_instances_by_batch(
+            paths,
+            get_batch_ids_from_file(args.with_batch_ids_from_file)
+        )
+    if args.with_batch_ids is not None:
+        paths = filter_instances_by_batch(
+            paths,
+            args.with_batch_ids
+        )
+    return paths
+
+
 def main(args):
+    if args.max_fraction_infeasible != 1 and (
+        args.with_batch_ids is not None
+        or args.with_batch_ids_from_file is not None
+    ):
+        print("WARNING: '--max_fraction_infeasible' ignored when '--with_batch_ids' is given.")
+        args.max_fraction_infeasible = 1
+
+    instances_prefix = f'data/{args.network}/{args.solver}/instances/'
+    results_prefix = f'data/{args.network}/{args.solver}/results/'
+
     client = boto3.client('s3')
 
     print("Downloading solution list.")
     result_paths = get_instance_list(client, prefix=results_prefix)
-    if args.from_date is not None:
-        result_paths = filter_instances_by_date(result_paths, args.from_date)
+    result_paths = filter_paths(result_paths, args)
 
     batches = {get_instance_batch(result_path) for result_path in result_paths}
 
@@ -168,15 +196,14 @@ def main(args):
     print("Selecting feasible instances.")
     feasible_batches = select_feasible_batches(
         args.max_nr_instances,
-        args.fraction_infeasible,
+        args.max_fraction_infeasible,
         args.selection_criteria,
         Path(result_dir.name)
     )
 
     print("Downloading problem list.")
     instance_paths = get_instance_list(client, prefix=instances_prefix)
-    if args.from_date is not None:
-        instance_paths = filter_instances_by_date(instance_paths, args.from_date)
+    instance_paths = filter_paths(instance_paths, args)
 
     print("Downloading feasible problems.")
     feasible_instance_paths = filter_instances_by_batch(instance_paths, feasible_batches)
@@ -186,10 +213,13 @@ def main(args):
 
     print("Selecting infeasible instances.")
     infeasible_batches = batches - feasible_batches
-    nr_infeasible = int(
-        (len(feasible_batches) * args.fraction_infeasible)
-        / (1 - args.fraction_infeasible)
-    )
+    if args.max_fraction_infeasible != 1:
+        nr_infeasible = int(
+            (len(feasible_batches) * args.max_fraction_infeasible)
+            / (1 - args.max_fraction_infeasible)
+        )
+    else:
+        nr_infeasible = len(infeasible_batches)
 
     infeasible_batches = select_batches(
         infeasible_batches,
@@ -229,7 +259,7 @@ def setup_arg_parser(subparsers):
         help='Maximum number of instances to download.'
     )
     parser.add_argument(
-        '--fraction_infeasible',
+        '--max_fraction_infeasible',
         type=float,
         default=1 / 3,
         help='Instances should have at most given fraction of infeasible instances.'
@@ -240,5 +270,30 @@ def setup_arg_parser(subparsers):
         choices=['most_recent', 'random'],
         default='random',
         help='How to select instances.'
+    )
+    parser.add_argument(
+        '--with_batch_ids',
+        type=str,
+        nargs='+',
+        help='Get instances with given batch ids (separated by spaces).'
+    )
+    parser.add_argument(
+        '--with_batch_ids_from_file',
+        type=str,
+        help='Get instances with batch ids given in specified file (one per line).'
+    )
+    parser.add_argument(
+        '--network',
+        type=str,
+        choices=['mainnet', 'mainnet-prod', 'rinkeby'],
+        default='mainnet',
+        help='Network where to pull instances from.'
+    )
+    parser.add_argument(
+        '--solver',
+        type=str,
+        choices=['standard-solver', 'fallback-solver', 'open-solver'],
+        default='standard-solver',
+        help='Solver where to pull solution instances from.'
     )
     parser.set_defaults(exec_subcommand=main)
