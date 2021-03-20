@@ -1,5 +1,5 @@
 inflection==0.3.1  # used for benchmarking
-Jinja2==2.11.2 # for reporting
+Jinja2==2.11.3 # for reporting
 pandas==1.0.3 # for data analysis
 matplotlib==3.2.1 # for making charts
 flake8==3.7.9 # source code formatter
